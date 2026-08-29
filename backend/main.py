@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.routes.analytics import router as analytics_router
+
 
 app = FastAPI(
     title="RetailPulse",
@@ -16,19 +18,29 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://retailpulse-frontend.onrender.com",
-],
+        # Local development
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+
+        # Production frontend
+        "https://retailpulse-frontend-52z1.onrender.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
+# ==========================================
+# API ROUTES
+# ==========================================
+
 app.include_router(
     analytics_router,
     prefix="/api",
 )
+
+
 # ==========================================
 # HEALTH CHECK
 # ==========================================
