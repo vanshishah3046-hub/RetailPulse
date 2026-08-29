@@ -3,10 +3,10 @@ import os
 from sqlalchemy import create_engine, text
 from urllib.parse import quote_plus
 
-DB_USER = "postgres"
-DB_HOST = "localhost"
-DB_PORT = "5432"
-DB_NAME = "retailpulse"
+DB_USER = os.getenv("RETAILPULSE_DB_USER", "postgres")
+DB_HOST = os.getenv("RETAILPULSE_DB_HOST", "localhost")
+DB_PORT = os.getenv("RETAILPULSE_DB_PORT", "5432")
+DB_NAME = os.getenv("RETAILPULSE_DB_NAME", "retailpulse")
 
 
 def create_db_engine():

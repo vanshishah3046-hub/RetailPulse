@@ -26,3 +26,4 @@ Thumbs.db
 # Python cache
 .pytest_cache/
 .mypy_cache/
+retailpulse_backup.dump
