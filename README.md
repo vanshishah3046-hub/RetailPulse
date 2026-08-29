@@ -4,7 +4,7 @@
 
 RetailPulse is an end-to-end **Business Intelligence and Retail Analytics platform** that transforms raw Superstore transaction data into an interactive analytics dashboard.
 
-The project combines **Python ETL, PostgreSQL, FastAPI and React** to provide business insights across revenue, profitability, customers, products, regions, forecasting and anomaly detection.
+The project combines **Python ETL, PostgreSQL, FastAPI, SQLAlchemy, and React** to provide business insights across revenue, profitability, customers, products, regions, forecasting, and anomaly detection.
 
 ---
 
@@ -14,7 +14,7 @@ The project combines **Python ETL, PostgreSQL, FastAPI and React** to provide bu
 - 💰 Revenue and profit analysis
 - 🛒 Order and unit analysis
 - 📊 Profit margin calculation
-- 📅 Date-based filtering
+- 📅 Date range filtering
 - 🌎 Regional performance analysis
 - 🏷️ Category performance analysis
 - 👥 Customer segment analysis
@@ -33,248 +33,392 @@ The project combines **Python ETL, PostgreSQL, FastAPI and React** to provide bu
 ## 🏗️ System Architecture
 
 ```text
-                 ┌──────────────────────┐
-                 │  Superstore Dataset  │
-                 │       (.xls)         │
-                 └──────────┬───────────┘
-                            │
-                            ▼
-                 ┌──────────────────────┐
-                 │     Python ETL       │
-                 │ Pandas + Validation  │
-                 └──────────┬───────────┘
-                            │
-                            ▼
-                 ┌──────────────────────┐
-                 │     PostgreSQL       │
-                 │    RetailPulse DB    │
-                 └──────────┬───────────┘
-                            │
-                            ▼
-                 ┌──────────────────────┐
-                 │       FastAPI        │
-                 │     REST APIs        │
-                 └──────────┬───────────┘
-                            │
-                            ▼
-                 ┌──────────────────────┐
-                 │        React         │
-                 │ Analytics Dashboard  │
-                 └──────────────────────┘
+                    ┌──────────────────────┐
+                    │  Superstore Dataset  │
+                    │        (.xls)        │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │      Python ETL      │
+                    │   Pandas + Cleaning  │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │     PostgreSQL       │
+                    │    RetailPulse DB    │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │      SQLAlchemy      │
+                    │   Database Access    │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │       FastAPI        │
+                    │      REST APIs       │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │        React         │
+                    │  Analytics Dashboard │
+                    └──────────────────────┘
+```
 
-🛠️ Technology Stack
-Backend
-Python
-FastAPI
-SQLAlchemy
-Pandas
-Psycopg2
-Database
-PostgreSQL
-Frontend
-React
-Vite
-Recharts
-Lucide React
-CSS
-Data Processing
-Pandas
-Python ETL pipeline
-🗄️ Database Design
+---
 
-RetailPulse uses a normalized PostgreSQL database with five main tables.
+## 🛠️ Technology Stack
 
-Customers
+### Backend
+
+- **Python**
+- **FastAPI**
+- **SQLAlchemy**
+- **Pandas**
+- **Psycopg2**
+
+### Database
+
+- **PostgreSQL**
+
+### Frontend
+
+- **React**
+- **Vite**
+- **Recharts**
+- **Lucide React**
+- **CSS**
+
+### Data Processing
+
+- **Pandas**
+- Python-based ETL pipeline
+
+---
+
+## 🗄️ Database Design
+
+RetailPulse uses a normalized PostgreSQL database consisting of five main tables.
+
+### 1. Customers
 
 Stores customer information.
 
-customer_id
-customer_name
-segment
-Locations
+| Column | Description |
+|---|---|
+| `customer_id` | Unique customer identifier |
+| `customer_name` | Customer name |
+| `segment` | Customer segment |
+
+---
+
+### 2. Locations
 
 Stores geographic information.
 
-location_id
-country
-state_province
-city
-postal_code
-region
-Products
+| Column | Description |
+|---|---|
+| `location_id` | Unique location identifier |
+| `country` | Country |
+| `state_province` | State or province |
+| `city` | City |
+| `postal_code` | Postal code |
+| `region` | Business region |
+
+---
+
+### 3. Products
 
 Stores product information.
 
-product_id
-product_name
-category
-sub_category
-Orders
+| Column | Description |
+|---|---|
+| `product_id` | Unique product identifier |
+| `product_name` | Product name |
+| `category` | Product category |
+| `sub_category` | Product sub-category |
+
+---
+
+### 4. Orders
 
 Stores order-level information.
 
-order_id
-customer_id
-location_id
-order_date
-ship_date
-ship_mode
-Order Items
+| Column | Description |
+|---|---|
+| `order_id` | Unique order identifier |
+| `customer_id` | Associated customer |
+| `location_id` | Associated location |
+| `order_date` | Date the order was placed |
+| `ship_date` | Date the order was shipped |
+| `ship_mode` | Shipping method |
+
+---
+
+### 5. Order Items
 
 Stores transaction-level sales information.
 
-order_item_id
-order_id
-product_id
-sales
-quantity
-discount
-profit
-🔄 ETL Pipeline
+| Column | Description |
+|---|---|
+| `order_item_id` | Unique transaction identifier |
+| `order_id` | Associated order |
+| `product_id` | Associated product |
+| `sales` | Sales amount |
+| `quantity` | Units sold |
+| `discount` | Discount applied |
+| `profit` | Profit generated |
 
-The Python ETL process converts the raw Superstore dataset into a structured relational database.
+---
 
-Pipeline
+## 🔄 ETL Pipeline
+
+The Python ETL pipeline transforms the raw Superstore dataset into structured relational data.
+
+### Pipeline
+
+```text
 Raw Excel Dataset
-       ↓
+        │
+        ▼
 Data Loading
-       ↓
+        │
+        ▼
 Data Cleaning & Validation
-       ↓
+        │
+        ▼
 Customer Extraction
-       ↓
+        │
+        ▼
 Location Extraction
-       ↓
+        │
+        ▼
 Product Extraction
-       ↓
+        │
+        ▼
 Order Extraction
-       ↓
+        │
+        ▼
 Order Item Extraction
-       ↓
+        │
+        ▼
 PostgreSQL Loading
-       ↓
+        │
+        ▼
 Data Validation
+```
+
+### Dataset Statistics
 
 The source dataset contains:
 
-10,194 transaction rows
-804 unique customers
-5,111 unique orders
-1,862 unique products
-3 categories
-17 sub-categories
-4 regions
-59 states/provinces
-542 cities
-📈 Analytics
-Executive KPIs
+| Metric | Count |
+|---|---:|
+| Transaction Rows | 10,194 |
+| Unique Customers | 804 |
+| Unique Orders | 5,111 |
+| Unique Products | 1,862 |
+| Categories | 3 |
+| Sub-Categories | 17 |
+| Regions | 4 |
+| States / Provinces | 59 |
+| Cities | 542 |
 
-RetailPulse calculates:
+---
 
-Total Revenue
-Total Profit
-Total Orders
-Units Sold
-Profit Margin
+## 📈 Analytics
 
-Profit margin:
+### Executive KPIs
 
+The dashboard provides the following key performance indicators:
+
+- **Total Revenue**
+- **Total Profit**
+- **Total Orders**
+- **Units Sold**
+- **Profit Margin**
+
+### Profit Margin
+
+```text
 Profit Margin = (Total Profit / Total Revenue) × 100
-Revenue Analytics
+```
+
+---
+
+### 📊 Revenue Analytics
 
 Monthly revenue and profit are aggregated from transaction-level data and presented through interactive visualizations.
 
-Category Analytics
+This allows users to identify changes in business performance over time.
 
-Categories are compared using:
+---
 
-Revenue
-Profit
-Units Sold
-Regional Analytics
+### 🏷️ Category Analytics
 
-Business performance is analyzed across the available geographic regions.
+Product categories are compared using:
 
-Product Intelligence
+- Revenue
+- Profit
+- Units Sold
 
-Products can be ranked using:
+This provides an overview of which categories contribute most to overall business performance.
 
-Revenue
-Profit
-Units Sold
-Customer Intelligence
+---
+
+### 🌎 Regional Analytics
+
+Sales and profitability are analyzed across the available business regions.
+
+This helps identify geographic differences in performance.
+
+---
+
+### 📦 Product Intelligence
+
+Products can be analyzed and ranked using:
+
+- Revenue
+- Profit
+- Units Sold
+
+This helps identify high-performing products.
+
+---
+
+### 👥 Customer Intelligence
 
 Customers are analyzed using:
 
-Revenue
-Profit
-Orders
-Units
-Customer Segment
-🔮 Revenue Forecasting
+- Revenue
+- Profit
+- Orders
+- Units
+- Customer Segment
 
-RetailPulse includes a baseline revenue forecasting system using a three-month moving average.
+This helps identify valuable customers and understand customer behavior.
+
+---
+
+## 🔮 Revenue Forecasting
+
+RetailPulse includes a baseline revenue forecasting system based on a **three-month moving average**.
 
 The latest three months of historical revenue are averaged to estimate the following three months.
 
+### Forecasting Process
+
+```text
 Historical Revenue
-       ↓
-Latest 3 Months
-       ↓
-Moving Average
-       ↓
+        │
+        ▼
+Latest Three Months
+        │
+        ▼
+Three-Month Moving Average
+        │
+        ▼
 Future Revenue Estimate
+```
 
-This approach provides a simple, transparent and explainable forecasting baseline.
+The approach is intentionally simple and explainable, making it suitable as a transparent forecasting baseline.
 
-🚨 Profit Anomaly Detection
+---
 
-RetailPulse identifies unusual monthly profit behavior using Z-score analysis.
+## 🚨 Profit Anomaly Detection
 
-A monthly profit value is evaluated against the distribution of historical monthly profits.
+RetailPulse identifies unusual monthly profit behavior using **Z-score analysis**.
 
-Months with an absolute Z-score of at least 2 are flagged as anomalies.
+A monthly profit value is compared against the historical distribution of monthly profits.
 
+Months with an absolute Z-score of at least **2** are flagged as anomalies.
+
+### Detection Process
+
+```text
 Monthly Profit
-      ↓
+      │
+      ▼
 Statistical Analysis
-      ↓
-Z-score
-      ↓
+      │
+      ▼
+Z-score Calculation
+      │
+      ▼
 Anomaly Detection
-      ↓
+      │
+      ▼
 Severity Classification
+```
+
+Anomalies are classified into severity levels such as:
+
+- **Medium**
+- **High**
 
 This helps identify unusually strong or weak profit periods.
 
-🔌 API Endpoints
-Endpoint	Purpose
-GET /api/analytics/overview	Executive KPI overview
-GET /api/analytics/monthly-revenue	Monthly revenue and profit
-GET /api/analytics/categories	Category performance
-GET /api/analytics/regions	Regional performance
-GET /api/analytics/dashboard	Dashboard analytics
-GET /api/analytics/products	Product intelligence
-GET /api/analytics/customers	Customer intelligence
-GET /api/analytics/forecast	Revenue forecasting
-GET /api/analytics/anomalies	Profit anomaly detection
+---
 
-Interactive API documentation is available through FastAPI Swagger UI.
+## 🔌 API Endpoints
 
-📁 Project Structure
+RetailPulse exposes analytics through FastAPI REST endpoints.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/api/analytics/overview` | Executive KPI overview |
+| `GET` | `/api/analytics/monthly-revenue` | Monthly revenue and profit |
+| `GET` | `/api/analytics/categories` | Category performance |
+| `GET` | `/api/analytics/regions` | Regional performance |
+| `GET` | `/api/analytics/dashboard` | Combined dashboard analytics |
+| `GET` | `/api/analytics/products` | Product intelligence |
+| `GET` | `/api/analytics/customers` | Customer intelligence |
+| `GET` | `/api/analytics/forecast` | Revenue forecasting |
+| `GET` | `/api/analytics/anomalies` | Profit anomaly detection |
+
+### API Documentation
+
+FastAPI provides interactive Swagger documentation at:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+---
+
+## 📁 Project Structure
+
+```text
 RetailPulse/
 │
 ├── backend/
+│   │
 │   ├── app/
 │   │   ├── database/
+│   │   │   └── __init__.py
+│   │   │
 │   │   ├── models/
+│   │   │   └── __init__.py
+│   │   │
 │   │   ├── routes/
+│   │   │   ├── __init__.py
 │   │   │   └── analytics.py
+│   │   │
 │   │   ├── services/
+│   │   │   ├── __init__.py
 │   │   │   └── analytics.py
-│   │   └── utils/
+│   │   │
+│   │   ├── utils/
+│   │   │   └── __init__.py
+│   │   │
+│   │   └── __init__.py
 │   │
 │   ├── etl/
+│   │   ├── __init__.py
 │   │   └── load_superstore.py
 │   │
 │   ├── main.py
@@ -290,6 +434,7 @@ RetailPulse/
 ├── docs/
 │
 ├── frontend/
+│   │
 │   ├── public/
 │   ├── src/
 │   │   ├── assets/
@@ -297,83 +442,224 @@ RetailPulse/
 │   │   ├── App.css
 │   │   ├── index.css
 │   │   └── main.jsx
+│   │
 │   ├── package.json
-│   └── vite.config.js
+│   ├── package-lock.json
+│   ├── vite.config.js
+│   └── eslint.config.js
 │
 └── README.md
-🚀 Running Locally
-1. Clone the repository
+```
+
+---
+
+## 🚀 Running the Project Locally
+
+### Prerequisites
+
+Make sure the following are installed:
+
+- Python
+- PostgreSQL
+- Node.js
+- npm
+
+---
+
+### 1. Clone the Repository
+
+```bash
 git clone https://github.com/vanshishah3046-hub/RetailPulse.git
 cd RetailPulse
-2. Backend Setup
+```
+
+---
+
+### 2. Backend Setup
+
+Navigate to the backend:
+
+```powershell
 cd backend
+```
+
+Create a virtual environment:
+
+```powershell
 python -m venv venv
+```
+
+Activate it:
+
+```powershell
 .\venv\Scripts\Activate.ps1
+```
+
+Install dependencies:
+
+```powershell
 pip install -r requirements.txt
+```
 
-Configure the PostgreSQL password using an environment variable:
+---
 
+### 3. Configure PostgreSQL
+
+RetailPulse uses:
+
+```text
+Database: retailpulse
+Host: localhost
+Port: 5432
+```
+
+Set the PostgreSQL password using the environment variable:
+
+```text
 RETAILPULSE_DB_PASSWORD=your_postgresql_password
+```
 
-Start FastAPI:
+Do not hard-code the PostgreSQL password in the source code.
 
+---
+
+### 4. Start the FastAPI Backend
+
+From the `backend` directory:
+
+```powershell
 uvicorn main:app --reload
+```
 
 Backend:
 
+```text
 http://127.0.0.1:8000
+```
 
-Swagger documentation:
+Swagger API documentation:
 
+```text
 http://127.0.0.1:8000/docs
-3. Frontend Setup
+```
+
+---
+
+### 5. Start the React Frontend
 
 Open another terminal:
 
+```powershell
 cd frontend
+```
+
+Install frontend dependencies:
+
+```powershell
 npm install
+```
+
+Start the development server:
+
+```powershell
 npm run dev
+```
 
 Vite will display the local frontend URL in the terminal.
 
-🔐 Environment Variables
+---
 
-Sensitive credentials should not be committed to the repository.
+## 🔐 Environment Variables
 
-Use:
+Sensitive credentials should never be committed to GitHub.
 
+RetailPulse uses:
+
+```text
 RETAILPULSE_DB_PASSWORD=your_postgresql_password
+```
 
-The actual password should never be stored in source code or committed to GitHub.
+The repository contains `.env.example` as a safe configuration template.
 
-🎯 Project Objective
+The actual `.env` file should remain local.
 
-RetailPulse demonstrates a complete data analytics workflow:
+---
 
-Raw Data
-   ↓
-ETL
-   ↓
-Database
-   ↓
-SQL Analytics
-   ↓
-REST API
-   ↓
-React Dashboard
-   ↓
-Business Intelligence
+## 📌 Project Workflow
 
-The project brings together data engineering, database management, backend development, statistical analysis and frontend visualization into a single retail analytics platform.
+The complete RetailPulse workflow is:
 
-📌 Project Status
+```text
+                 RAW DATA
+                    │
+                    ▼
+              PYTHON ETL
+                    │
+                    ▼
+              POSTGRESQL
+                    │
+                    ▼
+            ANALYTICS QUERIES
+                    │
+                    ▼
+                FASTAPI
+                    │
+                    ▼
+              REST APIs
+                    │
+                    ▼
+                REACT
+                    │
+                    ▼
+        INTERACTIVE DASHBOARD
+                    │
+                    ▼
+          BUSINESS INSIGHTS
+```
 
-Status: Completed and functional
+---
 
-The current version includes the complete data pipeline, PostgreSQL database, FastAPI analytics APIs and React dashboard.
+## 🎯 Project Objective
 
-👩‍💻 Author
+The objective of RetailPulse is to demonstrate a complete end-to-end data analytics and business intelligence workflow.
 
-Vanshi Shah
+The project integrates:
 
-RetailPulse was developed as an end-to-end data analytics and business intelligence project.
+- Data processing
+- ETL
+- Relational database design
+- SQL analytics
+- REST API development
+- Statistical analysis
+- Forecasting
+- Anomaly detection
+- Interactive data visualization
+
+into a single retail analytics platform.
+
+---
+
+## 📊 Project Status
+
+**Completed and functional.**
+
+The current version includes:
+
+- Complete ETL pipeline
+- PostgreSQL database
+- FastAPI backend
+- Analytics REST APIs
+- React dashboard
+- Interactive filtering
+- Product intelligence
+- Customer intelligence
+- Revenue forecasting
+- Profit anomaly detection
+
+---
+
+## 👩‍💻 Author
+
+**Vanshi Shah**
+
+RetailPulse is an end-to-end retail analytics and business intelligence project combining data engineering, backend development, database management, statistical analysis, and frontend visualization.
