@@ -23,8 +23,12 @@ import {
 } from "recharts";
 
 
+// ============================================================
+// API CONFIGURATION
+// ============================================================
+
 const API_BASE =
-  "http://127.0.0.1:8000/api/analytics";
+  "https://retailpulse-backend-4dub.onrender.com/api/analytics";
 
 const DASHBOARD_API =
   `${API_BASE}/dashboard`;
@@ -32,6 +36,19 @@ const DASHBOARD_API =
 const PRODUCTS_API =
   `${API_BASE}/products`;
 
+const CUSTOMERS_API =
+  `${API_BASE}/customers`;
+
+const FORECAST_API =
+  `${API_BASE}/forecast`;
+
+const ANOMALIES_API =
+  `${API_BASE}/anomalies`;
+
+
+// ============================================================
+// APP
+// ============================================================
 
 function App() {
 
@@ -46,7 +63,7 @@ function App() {
   const [forecast, setForecast] =
     useState(null);
 
-const [anomalies, setAnomalies] =
+  const [anomalies, setAnomalies] =
     useState([]);
 
   const [loading, setLoading] =
@@ -79,21 +96,29 @@ const [anomalies, setAnomalies] =
      LOAD PRODUCTS
   ========================================================== */
 
-useEffect(() => {
+  useEffect(() => {
 
-  fetchProducts();
-  fetchCustomers();
+    fetchProducts();
+    fetchCustomers();
 
-}, [filters]);
+  }, [filters]);
 
 
-useEffect(() => {
+  /* ==========================================================
+     LOAD FORECAST + ANOMALIES
+  ========================================================== */
 
-  fetchForecast();
-  fetchAnomalies();
+  useEffect(() => {
 
-}, []);
+    fetchForecast();
+    fetchAnomalies();
 
+  }, []);
+
+
+  /* ==========================================================
+     FETCH DASHBOARD
+  ========================================================== */
 
   async function fetchDashboard() {
 
@@ -213,234 +238,308 @@ useEffect(() => {
 
   }
 
-async function fetchProducts() {
 
-  try {
+  /* ==========================================================
+     FETCH PRODUCTS
+  ========================================================== */
 
-    const params =
-      new URLSearchParams();
+  async function fetchProducts() {
 
-    if (filters.year !== "All Time") {
-      params.set(
-        "date_from",
-        `${filters.year}-01-01`
+    try {
+
+      const params =
+        new URLSearchParams();
+
+
+      if (filters.year !== "All Time") {
+
+        params.set(
+          "date_from",
+          `${filters.year}-01-01`
+        );
+
+        params.set(
+          "date_to",
+          `${filters.year}-12-31`
+        );
+
+      }
+
+
+      if (filters.region !== "All Regions") {
+
+        params.set(
+          "region",
+          filters.region
+        );
+
+      }
+
+
+      if (filters.category !== "All Categories") {
+
+        params.set(
+          "category",
+          filters.category
+        );
+
+      }
+
+
+      if (filters.segment !== "All Segments") {
+
+        params.set(
+          "segment",
+          filters.segment
+        );
+
+      }
+
+
+      const query =
+        params.toString();
+
+
+      const url =
+        query
+          ? `${PRODUCTS_API}?${query}`
+          : PRODUCTS_API;
+
+
+      const response =
+        await fetch(url);
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          `Products API returned ${response.status}`
+        );
+
+      }
+
+
+      const result =
+        await response.json();
+
+
+      setProducts(
+        Array.isArray(result)
+          ? result
+          : []
       );
 
-      params.set(
-        "date_to",
-        `${filters.year}-12-31`
+    } catch (err) {
+
+      console.error(
+        "Products API error:",
+        err
       );
+
+      setProducts([]);
+
     }
-
-    if (filters.region !== "All Regions") {
-      params.set(
-        "region",
-        filters.region
-      );
-    }
-
-    if (filters.category !== "All Categories") {
-      params.set(
-        "category",
-        filters.category
-      );
-    }
-
-    if (filters.segment !== "All Segments") {
-      params.set(
-        "segment",
-        filters.segment
-      );
-    }
-
-    const query =
-      params.toString();
-
-    const url =
-      query
-        ? `http://127.0.0.1:8000/api/analytics/products?${query}`
-        : "http://127.0.0.1:8000/api/analytics/products";
-
-    const response =
-      await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `Products API returned ${response.status}`
-      );
-    }
-
-    const result =
-      await response.json();
-
-    setProducts(
-      Array.isArray(result)
-        ? result
-        : []
-    );
-
-  } catch (err) {
-
-    console.error(
-      "Products API error:",
-      err
-    );
-
-    setProducts([]);
 
   }
 
-}
- 
-async function fetchCustomers() {
 
-  try {
+  /* ==========================================================
+     FETCH CUSTOMERS
+  ========================================================== */
 
-    const params =
-      new URLSearchParams();
+  async function fetchCustomers() {
 
-    if (filters.year !== "All Time") {
-      params.set(
-        "date_from",
-        `${filters.year}-01-01`
+    try {
+
+      const params =
+        new URLSearchParams();
+
+
+      if (filters.year !== "All Time") {
+
+        params.set(
+          "date_from",
+          `${filters.year}-01-01`
+        );
+
+        params.set(
+          "date_to",
+          `${filters.year}-12-31`
+        );
+
+      }
+
+
+      if (filters.region !== "All Regions") {
+
+        params.set(
+          "region",
+          filters.region
+        );
+
+      }
+
+
+      if (filters.category !== "All Categories") {
+
+        params.set(
+          "category",
+          filters.category
+        );
+
+      }
+
+
+      if (filters.segment !== "All Segments") {
+
+        params.set(
+          "segment",
+          filters.segment
+        );
+
+      }
+
+
+      const query =
+        params.toString();
+
+
+      const url =
+        query
+          ? `${CUSTOMERS_API}?${query}`
+          : CUSTOMERS_API;
+
+
+      const response =
+        await fetch(url);
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          `Customers API returned ${response.status}`
+        );
+
+      }
+
+
+      const result =
+        await response.json();
+
+
+      setCustomers(
+        Array.isArray(result)
+          ? result
+          : []
       );
 
-      params.set(
-        "date_to",
-        `${filters.year}-12-31`
+    } catch (err) {
+
+      console.error(
+        "Customers API error:",
+        err
       );
+
+      setCustomers([]);
+
     }
-
-    if (filters.region !== "All Regions") {
-      params.set(
-        "region",
-        filters.region
-      );
-    }
-
-    if (filters.category !== "All Categories") {
-      params.set(
-        "category",
-        filters.category
-      );
-    }
-
-    if (filters.segment !== "All Segments") {
-      params.set(
-        "segment",
-        filters.segment
-      );
-    }
-
-    const query =
-      params.toString();
-
-    const url =
-      query
-        ? `http://127.0.0.1:8000/api/analytics/customers?${query}`
-        : "http://127.0.0.1:8000/api/analytics/customers";
-
-    const response =
-      await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `Customers API returned ${response.status}`
-      );
-    }
-
-    const result =
-      await response.json();
-
-    setCustomers(
-      Array.isArray(result)
-        ? result
-        : []
-    );
-
-  } catch (err) {
-
-    console.error(
-      "Customers API error:",
-      err
-    );
-
-    setCustomers([]);
 
   }
 
-}
- 
-async function fetchForecast() {
 
-  try {
+  /* ==========================================================
+     FETCH FORECAST
+  ========================================================== */
 
-    const response =
-      await fetch(
-        "http://127.0.0.1:8000/api/analytics/forecast"
+  async function fetchForecast() {
+
+    try {
+
+      const response =
+        await fetch(
+          FORECAST_API
+        );
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          `Forecast API returned ${response.status}`
+        );
+
+      }
+
+
+      const result =
+        await response.json();
+
+
+      setForecast(result);
+
+    } catch (err) {
+
+      console.error(
+        "Forecast API error:",
+        err
       );
 
-    if (!response.ok) {
-      throw new Error(
-        `Forecast API returned ${response.status}`
-      );
+      setForecast(null);
+
     }
-
-    const result =
-      await response.json();
-
-    setForecast(result);
-
-  } catch (err) {
-
-    console.error(
-      "Forecast API error:",
-      err
-    );
-
-    setForecast(null);
 
   }
 
-}
+
+  /* ==========================================================
+     FETCH ANOMALIES
+  ========================================================== */
+
+  async function fetchAnomalies() {
+
+    try {
+
+      const response =
+        await fetch(
+          ANOMALIES_API
+        );
 
 
-async function fetchAnomalies() {
+      if (!response.ok) {
 
-  try {
+        throw new Error(
+          `Anomaly API returned ${response.status}`
+        );
 
-    const response =
-      await fetch(
-        "http://127.0.0.1:8000/api/analytics/anomalies"
+      }
+
+
+      const result =
+        await response.json();
+
+
+      setAnomalies(
+        Array.isArray(result)
+          ? result
+          : []
       );
 
-    if (!response.ok) {
-      throw new Error(
-        `Anomaly API returned ${response.status}`
+    } catch (err) {
+
+      console.error(
+        "Anomaly API error:",
+        err
       );
+
+      setAnomalies([]);
+
     }
-
-    const result =
-      await response.json();
-
-    setAnomalies(
-      Array.isArray(result)
-        ? result
-        : []
-    );
-
-  } catch (err) {
-
-    console.error(
-      "Anomaly API error:",
-      err
-    );
-
-    setAnomalies([]);
 
   }
 
-}
+
+  /* ==========================================================
+     FILTER HELPERS
+  ========================================================== */
 
   function updateFilter(
     name,
@@ -476,6 +575,10 @@ async function fetchAnomalies() {
   }
 
 
+  /* ==========================================================
+     DATA
+  ========================================================== */
+
   const overview =
     data?.overview || {};
 
@@ -498,6 +601,10 @@ async function fetchAnomalies() {
     filters.category !== "All Categories" ||
     filters.segment !== "All Segments";
 
+
+  /* ==========================================================
+     RENDER
+  ========================================================== */
 
   return (
 
@@ -932,7 +1039,6 @@ async function fetchAnomalies() {
                         color:
                           "#e8edf5",
                       }}
-
                       formatter={(value) =>
                         formatCurrency(
                           value
@@ -1069,7 +1175,6 @@ async function fetchAnomalies() {
                         borderRadius:
                           "10px",
                       }}
-
                       formatter={(value) =>
                         formatCurrency(
                           value
@@ -1200,7 +1305,6 @@ async function fetchAnomalies() {
                         borderRadius:
                           "10px",
                       }}
-
                       formatter={(value) =>
                         formatCurrency(
                           value
@@ -1406,369 +1510,417 @@ async function fetchAnomalies() {
 
         </section>
 
-            <section className="panel product-panel">
 
-  <div className="panel-heading">
+        {/* ==================================================
+            CUSTOMER PERFORMANCE
+        ================================================== */}
 
-    <div>
+        <section className="panel product-panel">
 
-      <span className="panel-label">
-        CUSTOMER INTELLIGENCE
-      </span>
+          <div className="panel-heading">
 
-      <h3>
-        Top Customers by Revenue
-      </h3>
+            <div>
 
-    </div>
+              <span className="panel-label">
+                CUSTOMER INTELLIGENCE
+              </span>
 
-    <ShoppingCart size={20} />
-
-  </div>
-
-
-  <div className="product-table-wrapper">
-
-    {customers.length === 0 ? (
-
-      <div className="chart-loading">
-
-        Loading customer intelligence...
-
-      </div>
-
-    ) : (
-
-      <table className="product-table">
-
-        <thead>
-
-          <tr>
-
-            <th>#</th>
-
-            <th>CUSTOMER</th>
-
-            <th>SEGMENT</th>
-
-            <th>ORDERS</th>
-
-            <th>REVENUE</th>
-
-            <th>PROFIT</th>
-
-          </tr>
-
-        </thead>
-
-
-        <tbody>
-
-          {customers.map(
-            (customer, index) => (
-
-              <tr
-                key={
-                  customer.customer_id
-                }
-              >
-
-                <td className="rank">
-                  {index + 1}
-                </td>
-
-
-                <td>
-
-                  <div className="product-name">
-                    {
-                      customer.customer_name
-                    }
-                  </div>
-
-                  <div className="product-id">
-                    {
-                      customer.customer_id
-                    }
-                  </div>
-
-                </td>
-
-
-                <td>
-
-                  <span className="category-tag">
-                    {
-                      customer.segment
-                    }
-                  </span>
-
-                </td>
-
-
-                <td className="number-cell">
-                  {
-                    customer.orders
-                  }
-                </td>
-
-
-                <td className="number-cell">
-                  {formatCurrency(
-                    customer.revenue
-                  )}
-                </td>
-
-
-                <td className="number-cell profit-value">
-                  {formatCurrency(
-                    customer.profit
-                  )}
-                </td>
-
-              </tr>
-
-            )
-          )}
-
-        </tbody>
-
-      </table>
-
-    )}
-
-  </div>
-
-</section>
-
-<section className="chart-grid">
-
-  <div className="panel large-panel">
-
-    <div className="panel-heading">
-
-      <div>
-
-        <span className="panel-label">
-          PREDICTIVE ANALYTICS
-        </span>
-
-        <h3>
-          Revenue Forecast
-        </h3>
-
-      </div>
-
-      <TrendingUp size={20} />
-
-    </div>
-
-
-    <div className="real-chart">
-
-      {!forecast ? (
-
-        <div className="chart-loading">
-          Loading forecast...
-        </div>
-
-      ) : (
-
-        <ResponsiveContainer
-          width="100%"
-          height={360}
-        >
-
-          <AreaChart
-            data={[
-              ...(forecast.history || []),
-              ...(forecast.forecast || []).map(
-                item => ({
-                  ...item,
-                  forecast: item.revenue
-                })
-              )
-            ]}
-          >
-
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.06)"
-            />
-
-            <XAxis
-              dataKey="month"
-              tick={{
-                fill: "#718091",
-                fontSize: 10,
-              }}
-              tickLine={false}
-              axisLine={false}
-            />
-
-            <YAxis
-              tick={{
-                fill: "#718091",
-                fontSize: 10,
-              }}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={
-                formatCompactCurrency
-              }
-            />
-
-            <Tooltip
-              contentStyle={{
-                background: "#0c1923",
-                border:
-                  "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "10px",
-              }}
-
-              formatter={(value) =>
-                formatCurrency(value)
-              }
-            />
-
-            <Area
-              type="monotone"
-              dataKey="revenue"
-              stroke="#65bfd1"
-              fill="rgba(101,191,209,0.10)"
-              strokeWidth={2}
-              name="Historical"
-            />
-
-            <Area
-              type="monotone"
-              dataKey="forecast"
-              stroke="#d5a85b"
-              fill="rgba(213,168,91,0.08)"
-              strokeWidth={2}
-              strokeDasharray="6 4"
-              name="Forecast"
-            />
-
-          </AreaChart>
-
-        </ResponsiveContainer>
-
-      )}
-
-    </div>
-
-  </div>
-
-
-  <div className="panel">
-
-    <div className="panel-heading">
-
-      <div>
-
-        <span className="panel-label">
-          RISK MONITOR
-        </span>
-
-        <h3>
-          Profit Anomalies
-        </h3>
-
-      </div>
-
-      <BarChart3 size={20} />
-
-    </div>
-
-
-    <div className="anomaly-list">
-
-      {anomalies.length === 0 ? (
-
-        <div className="chart-loading">
-
-          <span>
-            ✓
-          </span>
-
-          <p>
-            No major anomalies detected.
-          </p>
-
-          <small>
-            Monthly profit is within
-            normal variation.
-          </small>
-
-        </div>
-
-      ) : (
-
-        anomalies.map(
-          (item) => (
-
-            <div
-              className="anomaly-item"
-              key={item.month}
-            >
-
-              <div>
-
-                <strong>
-                  {item.month}
-                </strong>
-
-                <span>
-                  Profit:{" "}
-                  {formatCurrency(
-                    item.profit
-                  )}
-                </span>
-
-              </div>
-
-
-              <div>
-
-                <span
-                  className={
-                    `severity ${item.severity.toLowerCase()}`
-                  }
-                >
-                  {item.severity}
-                </span>
-
-                <small>
-                  Z-score: {item.z_score}
-                </small>
-
-              </div>
+              <h3>
+                Top Customers by Revenue
+              </h3>
 
             </div>
 
-          )
-        )
 
-      )}
+            <ShoppingCart
+              size={20}
+            />
 
-    </div>
+          </div>
 
-  </div>
 
-</section>
+          <div className="product-table-wrapper">
+
+            {customers.length === 0 ? (
+
+              <div className="chart-loading">
+
+                Loading customer intelligence...
+
+              </div>
+
+            ) : (
+
+              <table className="product-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      #
+                    </th>
+
+                    <th>
+                      CUSTOMER
+                    </th>
+
+                    <th>
+                      SEGMENT
+                    </th>
+
+                    <th>
+                      ORDERS
+                    </th>
+
+                    <th>
+                      REVENUE
+                    </th>
+
+                    <th>
+                      PROFIT
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                  {customers.map(
+                    (
+                      customer,
+                      index
+                    ) => (
+
+                      <tr
+                        key={
+                          customer.customer_id
+                        }
+                      >
+
+                        <td className="rank">
+                          {index + 1}
+                        </td>
+
+
+                        <td>
+
+                          <div className="product-name">
+
+                            {
+                              customer.customer_name
+                            }
+
+                          </div>
+
+
+                          <div className="product-id">
+
+                            {
+                              customer.customer_id
+                            }
+
+                          </div>
+
+                        </td>
+
+
+                        <td>
+
+                          <span className="category-tag">
+
+                            {
+                              customer.segment
+                            }
+
+                          </span>
+
+                        </td>
+
+
+                        <td className="number-cell">
+
+                          {
+                            customer.orders
+                          }
+
+                        </td>
+
+
+                        <td className="number-cell">
+
+                          {formatCurrency(
+                            customer.revenue
+                          )}
+
+                        </td>
+
+
+                        <td className="number-cell profit-value">
+
+                          {formatCurrency(
+                            customer.profit
+                          )}
+
+                        </td>
+
+                      </tr>
+
+                    )
+                  )}
+
+                </tbody>
+
+              </table>
+
+            )}
+
+          </div>
+
+        </section>
+
+
+        {/* ==================================================
+            FORECAST + ANOMALIES
+        ================================================== */}
+
+        <section className="chart-grid">
+
+
+          <div className="panel large-panel">
+
+            <div className="panel-heading">
+
+              <div>
+
+                <span className="panel-label">
+                  PREDICTIVE ANALYTICS
+                </span>
+
+                <h3>
+                  Revenue Forecast
+                </h3>
+
+              </div>
+
+              <TrendingUp
+                size={20}
+              />
+
+            </div>
+
+
+            <div className="real-chart">
+
+              {!forecast ? (
+
+                <div className="chart-loading">
+                  Loading forecast...
+                </div>
+
+              ) : (
+
+                <ResponsiveContainer
+                  width="100%"
+                  height={360}
+                >
+
+                  <AreaChart
+                    data={[
+                      ...(forecast.history || []),
+
+                      ...(forecast.forecast || []).map(
+                        item => ({
+                          ...item,
+                          forecast: item.revenue,
+                        })
+                      ),
+                    ]}
+                  >
+
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="rgba(255,255,255,0.06)"
+                    />
+
+                    <XAxis
+                      dataKey="month"
+                      tick={{
+                        fill: "#718091",
+                        fontSize: 10,
+                      }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+
+                    <YAxis
+                      tick={{
+                        fill: "#718091",
+                        fontSize: 10,
+                      }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={
+                        formatCompactCurrency
+                      }
+                    />
+
+                    <Tooltip
+                      contentStyle={{
+                        background: "#0c1923",
+                        border:
+                          "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "10px",
+                      }}
+                      formatter={(value) =>
+                        formatCurrency(value)
+                      }
+                    />
+
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#65bfd1"
+                      fill="rgba(101,191,209,0.10)"
+                      strokeWidth={2}
+                      name="Historical"
+                    />
+
+                    <Area
+                      type="monotone"
+                      dataKey="forecast"
+                      stroke="#d5a85b"
+                      fill="rgba(213,168,91,0.08)"
+                      strokeWidth={2}
+                      strokeDasharray="6 4"
+                      name="Forecast"
+                    />
+
+                  </AreaChart>
+
+                </ResponsiveContainer>
+
+              )}
+
+            </div>
+
+          </div>
+
+
+          <div className="panel">
+
+            <div className="panel-heading">
+
+              <div>
+
+                <span className="panel-label">
+                  RISK MONITOR
+                </span>
+
+                <h3>
+                  Profit Anomalies
+                </h3>
+
+              </div>
+
+              <BarChart3
+                size={20}
+              />
+
+            </div>
+
+
+            <div className="anomaly-list">
+
+              {anomalies.length === 0 ? (
+
+                <div className="chart-loading">
+
+                  <span>
+                    ✓
+                  </span>
+
+                  <p>
+                    No major anomalies detected.
+                  </p>
+
+                  <small>
+                    Monthly profit is within
+                    normal variation.
+                  </small>
+
+                </div>
+
+              ) : (
+
+                anomalies.map(
+                  (item) => (
+
+                    <div
+                      className="anomaly-item"
+                      key={item.month}
+                    >
+
+                      <div>
+
+                        <strong>
+                          {item.month}
+                        </strong>
+
+                        <span>
+                          Profit:{" "}
+                          {formatCurrency(
+                            item.profit
+                          )}
+                        </span>
+
+                      </div>
+
+
+                      <div>
+
+                        <span
+                          className={
+                            `severity ${item.severity.toLowerCase()}`
+                          }
+                        >
+                          {item.severity}
+                        </span>
+
+                        <small>
+                          Z-score: {item.z_score}
+                        </small>
+
+                      </div>
+
+                    </div>
+
+                  )
+                )
+
+              )}
+
+            </div>
+
+          </div>
+
+        </section>
+
 
       </main>
 
     </div>
 
   );
+
 }
 
 
-/* ============================================================
-   FILTER COMPONENT
-============================================================ */
+// ============================================================
+// FILTER COMPONENT
+// ============================================================
 
 function Filter({
   label,
@@ -1817,9 +1969,9 @@ function Filter({
 }
 
 
-/* ============================================================
-   KPI CARD
-============================================================ */
+// ============================================================
+// KPI CARD
+// ============================================================
 
 function KpiCard({
   icon,
@@ -1860,9 +2012,9 @@ function KpiCard({
 }
 
 
-/* ============================================================
-   FORMATTERS
-============================================================ */
+// ============================================================
+// FORMATTERS
+// ============================================================
 
 function formatCurrency(value) {
 
